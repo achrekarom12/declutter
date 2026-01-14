@@ -12,6 +12,8 @@ export default function Home() {
   const [isPending, startTransition] = useTransition();
   const [showUndo, setShowUndo] = useState(false);
   const [movedCount, setMovedCount] = useState(0);
+  const [renamingFile, setRenamingFile] = useState<string | null>(null);
+  const [newName, setNewName] = useState("");
 
   const loadFolder = async (path?: string) => {
     setError(null);
@@ -74,6 +76,27 @@ export default function Home() {
         loadFolder(currentPath);
       }
     }
+  };
+
+  const handleRename = async (file: FileInfo) => {
+    if (!newName || newName === file.name) {
+      setRenamingFile(null);
+      return;
+    }
+
+    const result = await window.electron.renameFile(file.path, newName);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setRenamingFile(null);
+      loadFolder(currentPath);
+    }
+  };
+
+  const startRenaming = (e: React.MouseEvent, file: FileInfo) => {
+    e.stopPropagation();
+    setRenamingFile(file.path);
+    setNewName(file.name);
   };
 
   const handleDeclutter = async () => {
@@ -209,9 +232,9 @@ export default function Home() {
         <div className="flex-1 overflow-hidden flex flex-col no-drag">
           <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider border-b border-white/5">
             <div className="col-span-7">Name</div>
-            <div className="col-span-2">Type</div>
+            <div className="col-span-1">Type</div>
             <div className="col-span-2 text-right">Size</div>
-            <div className="col-span-1 text-right">Action</div>
+            <div className="col-span-2 text-right">Action</div>
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mt-2">
@@ -244,17 +267,42 @@ export default function Home() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       )}
-                      <span className="text-sm truncate text-white/80 group-hover:text-white transition-colors">
-                        {file.name}
-                      </span>
+                      {renamingFile === file.path ? (
+                        <input
+                          autoFocus
+                          type="text"
+                          value={newName}
+                          onChange={(e) => setNewName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleRename(file);
+                            if (e.key === "Escape") setRenamingFile(null);
+                          }}
+                          onBlur={() => handleRename(file)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-white/10 border border-blue-500/50 rounded px-2 py-0.5 text-sm text-white focus:outline-none w-full"
+                        />
+                      ) : (
+                        <span className="text-sm truncate text-white/80 group-hover:text-white transition-colors">
+                          {file.name}
+                        </span>
+                      )}
                     </div>
-                    <div className="col-span-2 text-xs text-zinc-500 self-center">
+                    <div className="col-span-1 text-xs text-zinc-500 self-center">
                       {file.isDirectory ? "Folder" : "File"}
                     </div>
                     <div className="col-span-2 text-xs text-zinc-400 self-center text-right font-mono">
                       {formatSize(file.size)}
                     </div>
-                    <div className="col-span-1 flex justify-end items-center">
+                    <div className="col-span-2 flex justify-end items-center gap-1">
+                      <button
+                        onClick={(e) => startRenaming(e, file)}
+                        className="p-1.5 hover:bg-white/10 text-zinc-500 hover:text-white rounded-md transition-all opacity-0 group-hover:opacity-100"
+                        title="Rename"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
                       <button
                         onClick={(e) => handleDelete(e, file)}
                         className="p-1.5 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 rounded-md transition-all opacity-0 group-hover:opacity-100"

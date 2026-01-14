@@ -74,6 +74,17 @@ ipcMain.handle("delete-file", async (event, filePath) => {
     }
 });
 
+ipcMain.handle("rename-file", async (event, oldPath, newName) => {
+    try {
+        const dirname = path.dirname(oldPath);
+        const newPath = path.join(dirname, newName);
+        await fs.promises.rename(oldPath, newPath);
+        return { success: true };
+    } catch (err) {
+        return { error: err.message };
+    }
+});
+
 const DEFAULT_CATEGORIES = {
     "Documents": [".pdf", ".rtf", ".txt", ".docx", ".xlsx", ".pptx", ".csv", ".pages", ".numbers"],
     "Images": [".jpg", ".jpeg", ".png", ".gif", ".heic", ".svg", ".bmp", ".tiff"],
