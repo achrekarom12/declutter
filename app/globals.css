@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: transparent;
+  --background: #09090b;
   --foreground: #ffffff;
-  --glass-bg: rgba(20, 20, 20, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --accent: #3a86ff;
+  --glass-bg: rgba(18, 18, 21, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --accent: #3b82f6;
 }
 
 html,
@@ -22,12 +22,12 @@ body {
 
 .titlebar {
   -webkit-app-region: drag;
-  height: 40px;
+  height: 48px;
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  background: transparent;
+  padding: 0 20px;
+  background: rgba(0, 0, 0, 0.2);
   position: absolute;
   top: 0;
   left: 0;
@@ -69,6 +69,7 @@ body {
     transform: translate(-50%, 100%);
     opacity: 0;
   }
+
   to {
     transform: translate(-50%, 0);
     opacity: 1;

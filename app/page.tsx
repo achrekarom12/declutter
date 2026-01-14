@@ -160,10 +160,10 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col h-screen p-6 pt-12 overflow-hidden">
+    <main className="flex flex-col h-screen overflow-hidden bg-zinc-950 text-white relative">
       <div className="titlebar justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-xs font-semibold text-zinc-500 uppercase tracking-widest opacity-70">Declutter</span>
+          <span className="text-md font-bold tracking-widest opacity-70">DECLUTTER.io</span>
           <Breadcrumbs />
         </div>
         <button
@@ -176,7 +176,7 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 h-full glass-panel p-6 overflow-hidden">
+      <div className="flex-1 flex flex-col gap-4 p-6 pt-16 overflow-hidden">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -205,7 +205,7 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search files..."
-                className="bg-white/5 border border-white/10 rounded-full pl-9 pr-4 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all w-[200px] placeholder:text-zinc-600"
+                className="bg-white/5 rounded-full pl-9 pr-4 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all w-[200px] placeholder:text-zinc-600"
               />
             </div>
             <div className="text-[10px] text-zinc-500 font-mono bg-white/5 px-2 py-1 rounded">
@@ -213,7 +213,7 @@ export default function Home() {
             </div>
             <button
               onClick={handleDeclutter}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full transition-all border border-blue-500/20"
+              className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full transition-all"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -224,13 +224,13 @@ export default function Home() {
         </header>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-lg no-drag">
+          <div className="bg-red-500/10 text-red-400 text-xs p-3 rounded-lg no-drag">
             {error}
           </div>
         )}
 
         <div className="flex-1 overflow-hidden flex flex-col no-drag">
-          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider border-b border-white/5">
+          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider bg-white/5 rounded-lg">
             <div className="col-span-7">Name</div>
             <div className="col-span-1">Type</div>
             <div className="col-span-2 text-right">Size</div>
@@ -279,7 +279,7 @@ export default function Home() {
                           }}
                           onBlur={() => handleRename(file)}
                           onClick={(e) => e.stopPropagation()}
-                          className="bg-white/10 border border-blue-500/50 rounded px-2 py-0.5 text-sm text-white focus:outline-none w-full"
+                          className="bg-white/10 rounded px-2 py-0.5 text-sm text-white focus:outline-none w-full"
                         />
                       ) : (
                         <span className="text-sm truncate text-white/80 group-hover:text-white transition-colors">
@@ -322,7 +322,7 @@ export default function Home() {
       </div>
 
       {showUndo && (
-        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-3 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-8 duration-500 no-drag z-50">
+        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-3 bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-8 duration-500 no-drag z-50 rounded-2xl">
           <div className="flex flex-col">
             <span className="text-xs font-semibold text-white">Folder Decluttered</span>
             <span className="text-[10px] text-zinc-400">Moved {movedCount} files into categories</span>
