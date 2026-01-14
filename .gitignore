@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# distributions
+/declutter-darwin-x64
+/declutter-linux-x64
+/declutter-darwin-arm64
