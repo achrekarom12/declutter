@@ -10,6 +10,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [showUndo, setShowUndo] = useState(false);
+  const [movedCount, setMovedCount] = useState(0);
 
   const loadFolder = async (path?: string) => {
     setError(null);
@@ -71,6 +73,34 @@ export default function Home() {
       } else {
         loadFolder(currentPath);
       }
+    }
+  };
+
+  const handleDeclutter = async () => {
+    setError(null);
+    const result = await window.electron.declutter(currentPath);
+    if (result.error) {
+      setError(result.error);
+    } else if (result.movedCount && result.movedCount > 0) {
+      setMovedCount(result.movedCount);
+      setShowUndo(true);
+      loadFolder(currentPath);
+      // Auto-hide undo after 10 seconds
+      setTimeout(() => setShowUndo(false), 10000);
+    } else {
+      setError("No files to declutter in this folder.");
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleUndo = async () => {
+    setError(null);
+    const result = await window.electron.undoDeclutter();
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setShowUndo(false);
+      loadFolder(currentPath);
     }
   };
 
@@ -158,6 +188,15 @@ export default function Home() {
             <div className="text-[10px] text-zinc-500 font-mono bg-white/5 px-2 py-1 rounded">
               {searchQuery ? `${filteredFiles.length} of ${files.length}` : `${files.length} items`}
             </div>
+            <button
+              onClick={handleDeclutter}
+              className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full transition-all border border-blue-500/20"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Declutter
+            </button>
           </div>
         </header>
 
@@ -233,6 +272,29 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {showUndo && (
+        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-3 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-8 duration-500 no-drag z-50">
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-white">Folder Decluttered</span>
+            <span className="text-[10px] text-zinc-400">Moved {movedCount} files into categories</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowUndo(false)}
+              className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-widest"
+            >
+              Dismiss
+            </button>
+            <button
+              onClick={handleUndo}
+              className="px-4 py-1.5 bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-bold rounded-lg transition-all shadow-lg shadow-blue-500/20 uppercase tracking-widest"
+            >
+              Undo
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

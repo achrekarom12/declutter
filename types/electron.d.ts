@@ -16,6 +16,8 @@ export interface ElectronAPI {
     listFiles: (folderPath?: string) => Promise<ListFilesResult>;
     getHomeDir: () => Promise<string>;
     deleteFile: (filePath: string) => Promise<{ success?: boolean; error?: string }>;
+    declutter: (folderPath?: string) => Promise<{ success?: boolean; movedCount?: number; error?: string }>;
+    undoDeclutter: () => Promise<{ success?: boolean; undoneCount?: number; error?: string }>;
     closeApp: () => void;
 }
 
