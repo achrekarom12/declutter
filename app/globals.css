@@ -1,11 +1,37 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-card: var(--card-bg);
+  --color-hover: var(--hover-bg);
+  --color-border-dim: var(--border);
+  --color-muted: var(--text-muted);
+}
+
 :root {
+  --background: #ffffff;
+  --foreground: #09090b;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --accent: #3b82f6;
+  --card-bg: rgba(0, 0, 0, 0.03);
+  --hover-bg: rgba(0, 0, 0, 0.06);
+  --text-muted: #71717a;
+  --border: #e4e4e7;
+}
+
+.dark {
   --background: #09090b;
   --foreground: #ffffff;
   --glass-bg: rgba(18, 18, 21, 0.95);
   --glass-border: rgba(255, 255, 255, 0.05);
   --accent: #3b82f6;
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --hover-bg: rgba(255, 255, 255, 0.08);
+  --text-muted: #a1a1aa;
+  --border: #27272a;
 }
 
 html,
@@ -27,7 +53,8 @@ body {
   display: flex;
   align-items: center;
   padding: 0 20px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
   position: absolute;
   top: 0;
   left: 0;
@@ -56,12 +83,12 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--card-bg);
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--text-muted);
 }
 
 @keyframes slide-up {

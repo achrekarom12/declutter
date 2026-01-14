@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { FileInfo } from "../types/electron";
+import { useTheme } from "next-themes";
+import { Sun, Moon, Search, Folder, File, Trash2, Edit3, X, ChevronLeft, HardDrive, LayoutGrid } from "lucide-react";
 
 export default function Home() {
   const [currentPath, setCurrentPath] = useState<string>("");
@@ -14,6 +16,7 @@ export default function Home() {
   const [movedCount, setMovedCount] = useState(0);
   const [renamingFile, setRenamingFile] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
+  const { theme, setTheme } = useTheme();
 
   const loadFolder = async (path?: string) => {
     setError(null);
@@ -134,22 +137,23 @@ export default function Home() {
   const Breadcrumbs = () => {
     const parts = currentPath.split("/").filter(Boolean);
     return (
-      <div className="flex items-center gap-1 text-xs text-zinc-400 overflow-hidden whitespace-nowrap">
+      <div className="flex items-center gap-1 text-xs text-zinc-500 overflow-hidden whitespace-nowrap">
         <button
           onClick={() => loadFolder("/")}
-          className="hover:text-white transition-colors"
+          className="px-2 py-1 hover:bg-hover rounded-md transition-all flex items-center gap-1.5"
         >
-          Root
+          <HardDrive className="w-3.5 h-3.5" />
+          <span>Root</span>
         </button>
         {parts.map((part, idx) => (
           <div key={idx} className="flex items-center gap-1">
-            <span>/</span>
+            <span className="opacity-40">/</span>
             <button
               onClick={() => {
                 const path = "/" + parts.slice(0, idx + 1).join("/");
                 loadFolder(path);
               }}
-              className="hover:text-white transition-colors truncate max-w-[100px]"
+              className="px-2 py-1 hover:bg-hover rounded-md transition-all truncate max-w-[120px]"
             >
               {part}
             </button>
@@ -160,20 +164,30 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col h-screen overflow-hidden bg-zinc-950 text-white relative">
+    <main className="flex flex-col h-screen overflow-hidden bg-background text-foreground relative">
       <div className="titlebar justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-md font-bold tracking-widest opacity-70">DECLUTTER.io</span>
+          <div className="flex items-center gap-2">
+            <LayoutGrid className="w-5 h-5 text-blue-500" />
+            <span className="text-md font-bold tracking-widest opacity-80 dark:opacity-70">DECLUTTER.io</span>
+          </div>
           <Breadcrumbs />
         </div>
-        <button
-          onClick={() => window.electron.closeApp()}
-          className="no-drag p-1 hover:bg-white/10 rounded-md transition-colors text-zinc-500 hover:text-white"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2 no-drag">
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-1.5 hover:bg-hover rounded-md transition-colors text-zinc-500 hover:text-foreground"
+            title="Toggle Theme"
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={() => window.electron.closeApp()}
+            className="p-1.5 hover:bg-red-500/10 rounded-md transition-colors text-zinc-500 hover:text-red-500"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col gap-4 p-6 pt-16 overflow-hidden">
@@ -182,13 +196,11 @@ export default function Home() {
             <button
               onClick={handleBack}
               disabled={!parentPath || parentPath === currentPath}
-              className="p-2 hover:bg-white/10 rounded-full disabled:opacity-20 disabled:hover:bg-transparent transition-all no-drag text-white"
+              className="p-2 hover:bg-hover rounded-full disabled:opacity-20 disabled:hover:bg-transparent transition-all no-drag text-foreground"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-xl font-light tracking-tight text-white/90 truncate max-w-[200px]">
+            <h1 className="text-xl font-light tracking-tight text-foreground/90 truncate max-w-[200px]">
               {currentPath.split("/").pop() || "Root"}
             </h1>
           </div>
@@ -196,28 +208,24 @@ export default function Home() {
           <div className="flex items-center gap-3 no-drag">
             <div className="relative">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-zinc-500">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <Search className="w-3.5 h-3.5" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search files..."
-                className="bg-white/5 rounded-full pl-9 pr-4 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all w-[200px] placeholder:text-zinc-600"
+                className="bg-card dark:bg-card border border-border-dim rounded-full pl-9 pr-4 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all w-[240px] placeholder:text-zinc-500"
               />
             </div>
-            <div className="text-[10px] text-zinc-500 font-mono bg-white/5 px-2 py-1 rounded">
+            <div className="text-[10px] text-zinc-500 font-mono bg-card px-2.5 py-1.5 rounded-full border border-border-dim">
               {searchQuery ? `${filteredFiles.length} of ${files.length}` : `${files.length} items`}
             </div>
             <button
               onClick={handleDeclutter}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full transition-all"
+              className="flex items-center gap-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-full transition-all shadow-lg shadow-blue-500/20"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+              <LayoutGrid className="w-3.5 h-3.5" />
               Declutter
             </button>
           </div>
@@ -230,7 +238,7 @@ export default function Home() {
         )}
 
         <div className="flex-1 overflow-hidden flex flex-col no-drag">
-          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider bg-white/5 rounded-lg">
+          <div className="grid grid-cols-12 gap-4 px-4 py-2.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-card border border-border-dim rounded-xl">
             <div className="col-span-7">Name</div>
             <div className="col-span-1">Type</div>
             <div className="col-span-2 text-right">Size</div>
@@ -250,22 +258,22 @@ export default function Home() {
                 <span className="text-sm">{searchQuery ? "No matches found" : "Folder is empty"}</span>
               </div>
             ) : (
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col gap-1.5">
                 {filteredFiles.map((file, idx) => (
                   <li
                     key={idx}
                     onClick={() => handleFolderClick(file)}
-                    className={`grid grid-cols-12 gap-4 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors group cursor-default ${file.isDirectory ? 'cursor-pointer' : ''}`}
+                    className={`grid grid-cols-12 gap-4 px-4 py-3 rounded-xl hover:bg-hover border border-transparent hover:border-border-dim transition-all group cursor-default ${file.isDirectory ? 'cursor-pointer' : ''}`}
                   >
                     <div className="col-span-7 flex items-center gap-3 overflow-hidden">
                       {file.isDirectory ? (
-                        <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                        </svg>
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 flex-shrink-0">
+                          <Folder className="w-4 h-4" />
+                        </div>
                       ) : (
-                        <svg className="w-4 h-4 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-card text-zinc-500 flex-shrink-0">
+                          <File className="w-4 h-4" />
+                        </div>
                       )}
                       {renamingFile === file.path ? (
                         <input
@@ -279,10 +287,10 @@ export default function Home() {
                           }}
                           onBlur={() => handleRename(file)}
                           onClick={(e) => e.stopPropagation()}
-                          className="bg-white/10 rounded px-2 py-0.5 text-sm text-white focus:outline-none w-full"
+                          className="bg-card border border-border-dim rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full"
                         />
                       ) : (
-                        <span className="text-sm truncate text-white/80 group-hover:text-white transition-colors">
+                        <span className="text-sm font-medium truncate text-foreground/80 group-hover:text-foreground transition-colors">
                           {file.name}
                         </span>
                       )}
@@ -293,24 +301,20 @@ export default function Home() {
                     <div className="col-span-2 text-xs text-zinc-400 self-center text-right font-mono">
                       {formatSize(file.size)}
                     </div>
-                    <div className="col-span-2 flex justify-end items-center gap-1">
+                    <div className="col-span-2 flex justify-end items-center gap-1.5">
                       <button
                         onClick={(e) => startRenaming(e, file)}
-                        className="p-1.5 hover:bg-white/10 text-zinc-500 hover:text-white rounded-md transition-all opacity-0 group-hover:opacity-100"
+                        className="p-2 hover:bg-hover text-zinc-500 hover:text-foreground rounded-lg transition-all opacity-0 group-hover:opacity-100"
                         title="Rename"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
+                        <Edit3 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={(e) => handleDelete(e, file)}
-                        className="p-1.5 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 rounded-md transition-all opacity-0 group-hover:opacity-100"
+                        className="p-2 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                         title="Delete"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </li>
@@ -321,28 +325,30 @@ export default function Home() {
         </div>
       </div>
 
-      {showUndo && (
-        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-3 bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-8 duration-500 no-drag z-50 rounded-2xl">
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold text-white">Folder Decluttered</span>
-            <span className="text-[10px] text-zinc-400">Moved {movedCount} files into categories</span>
+      {
+        showUndo && (
+          <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-4 bg-background border border-black/5 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-8 duration-500 no-drag z-50 rounded-2xl">
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-foreground">Folder Decluttered</span>
+              <span className="text-[10px] text-zinc-500">Moved {movedCount} files into categories</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowUndo(false)}
+                className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-foreground transition-colors uppercase tracking-widest"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={handleUndo}
+                className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 uppercase tracking-widest"
+              >
+                Undo
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowUndo(false)}
-              className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-widest"
-            >
-              Dismiss
-            </button>
-            <button
-              onClick={handleUndo}
-              className="px-4 py-1.5 bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-bold rounded-lg transition-all shadow-lg shadow-blue-500/20 uppercase tracking-widest"
-            >
-              Undo
-            </button>
-          </div>
-        </div>
-      )}
-    </main>
+        )
+      }
+    </main >
   );
 }
