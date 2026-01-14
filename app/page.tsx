@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { FileInfo } from "../types/electron";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Search, Folder, File, Trash2, Edit3, X, ChevronLeft, HardDrive, LayoutGrid } from "lucide-react";
+import { Sun, Moon, Search, Folder, File, Trash2, Edit3, X, ChevronLeft, HardDrive, LayoutGrid, ArrowUp, ArrowDown } from "lucide-react";
 
 export default function Home() {
   const [currentPath, setCurrentPath] = useState<string>("");
@@ -16,6 +16,8 @@ export default function Home() {
   const [movedCount, setMovedCount] = useState(0);
   const [renamingFile, setRenamingFile] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "size">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { theme, setTheme } = useTheme();
 
   const loadFolder = async (path?: string) => {
@@ -134,6 +136,31 @@ export default function Home() {
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const sortedFiles = [...filteredFiles].sort((a, b) => {
+    // Folders always come first if we want, or we can just sort by name/size
+    // Let's keep folders first for a better UX
+    if (a.isDirectory && !b.isDirectory) return -1;
+    if (!a.isDirectory && b.isDirectory) return 1;
+
+    if (sortBy === "name") {
+      return sortOrder === "asc"
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name);
+    } else if (sortBy === "size") {
+      return sortOrder === "asc" ? a.size - b.size : b.size - a.size;
+    }
+    return 0;
+  });
+
+  const toggleSort = (field: "name" | "size") => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
   const Breadcrumbs = () => {
     const parts = currentPath.split("/").filter(Boolean);
     return (
@@ -238,11 +265,27 @@ export default function Home() {
         )}
 
         <div className="flex-1 overflow-hidden flex flex-col no-drag">
-          <div className="grid grid-cols-12 gap-4 px-4 py-2.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-card border border-border-dim rounded-xl">
-            <div className="col-span-7">Name</div>
+          <div className="grid grid-cols-12 gap-4 px-4 py-2.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-card border border-border-dim rounded-xl select-none">
+            <div
+              className="col-span-7 flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors"
+              onClick={() => toggleSort("name")}
+            >
+              Name
+              {sortBy === "name" && (
+                sortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+              )}
+            </div>
             <div className="col-span-1">Type</div>
-            <div className="col-span-2 text-right">Size</div>
-            <div className="col-span-2 text-right">Action</div>
+            <div
+              className="col-span-2 text-right flex items-center justify-end gap-1 cursor-pointer hover:text-foreground transition-colors"
+              onClick={() => toggleSort("size")}
+            >
+              Size
+              {sortBy === "size" && (
+                sortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+              )}
+            </div>
+            <div className="col-span-2 text-right text-zinc-500/50">Action</div>
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mt-2">
@@ -259,7 +302,7 @@ export default function Home() {
               </div>
             ) : (
               <ul className="flex flex-col gap-1.5">
-                {filteredFiles.map((file, idx) => (
+                {sortedFiles.map((file, idx) => (
                   <li
                     key={idx}
                     onClick={() => handleFolderClick(file)}
