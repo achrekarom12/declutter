@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { FileInfo } from "../types/electron";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Search, Folder, File, Trash2, Edit3, X, ChevronLeft, HardDrive, LayoutGrid, ArrowUp, ArrowDown } from "lucide-react";
+import { Sun, Moon, Search, Folder, File, Trash2, Edit3, X, ChevronLeft, HardDrive, LayoutGrid, ArrowUp, ArrowDown, FolderPlus } from "lucide-react";
 
 export default function Home() {
   const [currentPath, setCurrentPath] = useState<string>("");
@@ -118,6 +118,22 @@ export default function Home() {
     } else {
       setError("No files to declutter in this folder.");
       setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    setError(null);
+    const result = await window.electron.createFolder(currentPath);
+    if (result.error) {
+      setError(result.error);
+    } else if (result.success && result.newFolderPath && result.newFolderName) {
+      // Reload and then try to enter rename mode for the new folder
+      await loadFolder(currentPath);
+      // We need to set renamingFile to the new path
+      // Since loadFolder is async and state updates might batch, we might want to wait
+      // But for now, setting it directly should work if the path is stable
+      setRenamingFile(result.newFolderPath);
+      setNewName(result.newFolderName);
     }
   };
 
@@ -248,6 +264,14 @@ export default function Home() {
             <div className="text-[10px] text-zinc-500 font-mono bg-card px-2.5 py-1.5 rounded-full border border-border-dim">
               {searchQuery ? `${filteredFiles.length} of ${files.length}` : `${files.length} items`}
             </div>
+            <button
+              onClick={handleCreateFolder}
+              className="flex items-center gap-2 px-4 py-1.5 bg-card hover:bg-hover text-foreground border border-border-dim text-xs font-semibold rounded-full transition-all"
+              title="Create New Folder"
+            >
+              <FolderPlus className="w-3.5 h-3.5" />
+              New Folder
+            </button>
             <button
               onClick={handleDeclutter}
               className="flex items-center gap-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-full transition-all shadow-lg shadow-blue-500/20"

@@ -83,6 +83,27 @@ ipcMain.handle("rename-file", async (event, oldPath, newName) => {
     }
 });
 
+ipcMain.handle("create-folder", async (event, currentPath) => {
+    try {
+        const targetPath = currentPath || HOME_DIR;
+        const baseName = "New Folder";
+        let folderName = baseName;
+        let counter = 1;
+        let finalPath = path.join(targetPath, folderName);
+
+        while (fs.existsSync(finalPath)) {
+            folderName = `${baseName} (${counter})`;
+            finalPath = path.join(targetPath, folderName);
+            counter++;
+        }
+
+        await fs.promises.mkdir(finalPath);
+        return { success: true, newFolderPath: finalPath, newFolderName: folderName };
+    } catch (err) {
+        return { error: err.message };
+    }
+});
+
 const DEFAULT_CATEGORIES = {
     "Documents": [".pdf", ".rtf", ".txt", ".docx", ".xlsx", ".pptx", ".csv", ".pages", ".numbers"],
     "Images": [".jpg", ".jpeg", ".png", ".gif", ".heic", ".svg", ".bmp", ".tiff"],
