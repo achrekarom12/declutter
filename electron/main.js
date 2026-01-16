@@ -104,6 +104,32 @@ ipcMain.handle("create-folder", async (event, currentPath) => {
     }
 });
 
+ipcMain.handle("move-file", async (event, sourcePath, destinationFolder) => {
+    try {
+        const fileName = path.basename(sourcePath);
+        const newPath = path.join(destinationFolder, fileName);
+
+        // Don't allow moving into itself or subdirectory (simple check)
+        if (destinationFolder.startsWith(sourcePath)) {
+            return { error: "Cannot move a folder into itself." };
+        }
+
+        let finalPath = newPath;
+        let counter = 1;
+        while (fs.existsSync(finalPath)) {
+            const ext = path.extname(fileName);
+            const base = path.basename(fileName, ext);
+            finalPath = path.join(destinationFolder, `${base} (${counter})${ext}`);
+            counter++;
+        }
+
+        await fs.promises.rename(sourcePath, finalPath);
+        return { success: true };
+    } catch (err) {
+        return { error: err.message };
+    }
+});
+
 const DEFAULT_CATEGORIES = {
     "Documents": [".pdf", ".rtf", ".txt", ".docx", ".xlsx", ".pptx", ".csv", ".pages", ".numbers"],
     "Images": [".jpg", ".jpeg", ".png", ".gif", ".heic", ".svg", ".bmp", ".tiff"],

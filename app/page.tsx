@@ -19,6 +19,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<"name" | "size">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { theme, setTheme } = useTheme();
+  const [dragOverFolder, setDragOverFolder] = useState<string | null>(null);
 
   const loadFolder = async (path?: string) => {
     setError(null);
@@ -144,6 +145,37 @@ export default function Home() {
       setError(result.error);
     } else {
       setShowUndo(false);
+      loadFolder(currentPath);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, file: FileInfo) => {
+    e.dataTransfer.setData("text/plain", file.path);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetFile: FileInfo) => {
+    if (!targetFile.isDirectory) return;
+    e.preventDefault();
+    setDragOverFolder(targetFile.path);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setDragOverFolder(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetFile: FileInfo) => {
+    e.preventDefault();
+    setDragOverFolder(null);
+    const sourcePath = e.dataTransfer.getData("text/plain");
+
+    if (!sourcePath || !targetFile.isDirectory || sourcePath === targetFile.path) return;
+
+    const result = await window.electron.moveFile(sourcePath, targetFile.path);
+    if (result.error) {
+      setError(result.error);
+    } else {
       loadFolder(currentPath);
     }
   };
@@ -330,7 +362,12 @@ export default function Home() {
                   <li
                     key={idx}
                     onClick={() => handleFolderClick(file)}
-                    className={`grid grid-cols-12 gap-4 px-4 py-3 rounded-xl hover:bg-hover border border-transparent hover:border-border-dim transition-all group cursor-default ${file.isDirectory ? 'cursor-pointer' : ''}`}
+                    draggable={true}
+                    onDragStart={(e) => handleDragStart(e, file)}
+                    onDragOver={(e) => handleDragOver(e, file)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, file)}
+                    className={`grid grid-cols-12 gap-4 px-4 py-3 rounded-xl hover:bg-hover border border-transparent hover:border-border-dim transition-all group cursor-default ${file.isDirectory ? 'cursor-pointer' : ''} ${dragOverFolder === file.path ? 'bg-blue-500/20 border-blue-500/50' : ''}`}
                   >
                     <div className="col-span-7 flex items-center gap-3 overflow-hidden">
                       {file.isDirectory ? (

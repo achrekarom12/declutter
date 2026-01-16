@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("electron", {
     deleteFile: (filePath) => ipcRenderer.invoke("delete-file", filePath),
     renameFile: (filePath, newName) => ipcRenderer.invoke("rename-file", filePath, newName),
     createFolder: (folderPath) => ipcRenderer.invoke("create-folder", folderPath),
+    moveFile: (sourcePath, destinationPath) => ipcRenderer.invoke("move-file", sourcePath, destinationPath),
     declutter: (folderPath) => ipcRenderer.invoke("declutter", folderPath),
     undoDeclutter: () => ipcRenderer.invoke("undo-declutter"),
     closeApp: () => ipcRenderer.send("close-app"),
